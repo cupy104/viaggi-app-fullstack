@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viaggi di Gruppo - Organizzazione</title>
+    
+    <!-- Leaflet CSS per la mappa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ================================ -->
+    <!-- SEZIONE: LOGIN -->
+    <!-- ================================ -->
+    <div id="login-section" class="section active">
+        <div class="container">
+            <div class="login-card">
+                <h1>🌍 Viaggi di Gruppo</h1>
+                <p class="subtitle">Organizza i tuoi viaggi con gli amici</p>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            placeholder="Inserisci username"
+                            autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            placeholder="Inserisci password"
+                            autocomplete="current-password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Accedi</button>
+                    
+                    <div id="login-error" class="error-message"></div>
+                </form>
+                
+                <div class="info-box">
+                    <p><strong>Utenti di test:</strong></p>
+                    <p>Username: <code>mario_rossi</code> | Password: <code>password123</code></p>
+                    <p>Username: <code>laura_bianchi</code> | Password: <code>password123</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- SEZIONE: DASHBOARD PRINCIPALE -->
+    <!-- ================================ -->
+    <div id="dashboard-section" class="section">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <h2>🌍 Viaggi di Gruppo</h2>
+                <div class="nav-user">
+                    <span id="user-name">Utente</span>
+                    <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="trips-list">📋 Elenco Viaggi</button>
+            <button class="tab-btn" data-tab="map-view">🗺️ Mappa</button>
+            <button class="tab-btn" data-tab="new-trip">➕ Nuovo Viaggio</button>
+        </div>
+
+        <div class="container">
+            <!-- ================================ -->
+            <!-- TAB: ELENCO VIAGGI -->
+            <!-- ================================ -->
+            <div id="trips-list-tab" class="tab-content active">
+                <div class="header-section">
+                    <h2>I Tuoi Viaggi</h2>
+                    <div class="filter-group">
+                        <button class="btn btn-outline active" data-filter="all">Tutti</button>
+                        <button class="btn btn-outline" data-filter="done">Completati</button>
+                        <button class="btn btn-outline" data-filter="upcoming">Da fare</button>
+                    </div>
+                </div>
+
+                <div id="trips-container" class="trips-grid">
+                    <!-- Le card dei viaggi saranno inserite qui da JavaScript -->
+                </div>
+            </div>
+
+            <!-- ================================ -->
+            <!-- TAB: DETTAGLIO VIAGGIO -->
+            <!-- ================================ -->
+            <div id="trip-detail-tab" class="tab-content">
+                <div class="detail-header">
+                    <button id="back-to-list" class="btn btn-outline">← Indietro</button>
+                    <div class="detail-actions">
+                        <button id="edit-trip-btn" class="btn btn-secondary">✏️ Modifica</button>
+                        <button id="download-pdf-btn" class="btn btn-primary">📥 Scarica PDF</button>
+                        <button id="delete-trip-btn" class="btn btn-danger">🗑️ Elimina</button>
+                    </div>
+                </div>
+
+                <div id="trip-detail-content">
+                    <!-- Contenuto dettaglio viaggio sarà inserito qui -->
+                </div>
+
+                <!-- Sezioni gestione dati viaggio -->
+                <div class="detail-sections">
+                    <!-- Gestione Partecipanti -->
+                    <div class="detail-section">
+                        <h3>👥 Partecipanti</h3>
+                        <div id="participants-list"></div>
+                        <button id="manage-participants-btn" class="btn btn-outline">Gestisci Partecipanti</button>
+                    </div>
+
+                    <!-- Gestione Attività -->
+                    <div class="detail-section">
+                        <h3>📍 Attività e Tappe</h3>
+                        <div id="activities-list"></div>
+                        <button id="add-activity-btn" class="btn btn-outline">➕ Aggiungi Attività</button>
+                    </div>
+
+                    <!-- Gestione Spese -->
+                    <div class="detail-section">
+                        <h3>💰 Spese</h3>
+                        <div id="expenses-summary" class="expenses-summary"></div>
+                        <div id="expenses-list"></div>
+                        <button id="add-expense-btn" class="btn btn-outline">➕ Aggiungi Spesa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================ -->
+            <!-- TAB: MAPPA -->
+            <!-- ================================ -->
+            <div id="map-view-tab" class="tab-content">
+                <h2>🗺️ Mappa dei Viaggi</h2>
+                <div class="map-legend">
+                    <span class="legend-item"><span class="marker-red"></span> Viaggi Completati</span>
+                    <span class="legend-item"><span class="marker-green"></span> Viaggi Da Fare</span>
+                </div>
+                <div id="map-container">
+                    <!-- Mappa Leaflet sarà renderizzata qui -->
+                </div>
+            </div>
+
+            <!-- ================================ -->
+            <!-- TAB: NUOVO VIAGGIO -->
+            <!-- ================================ -->
+            <div id="new-trip-tab" class="tab-content">
+                <h2>➕ Crea Nuovo Viaggio</h2>
+                
+                <form id="new-trip-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trip-title">Titolo *</label>
+                            <input type="text" id="trip-title" required placeholder="Es: Weekend a Berlino">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="trip-destination">Destinazione *</label>
+                            <input type="text" id="trip-destination" required placeholder="Es: Berlino, Germania">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trip-start-date">Data Inizio</label>
+                            <input type="date" id="trip-start-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="trip-end-date">Data Fine</label>
+                            <input type="date" id="trip-end-date">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trip-lat">Latitudine</label>
+                            <input type="number" id="trip-lat" step="0.0001" placeholder="Es: 52.5200">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="trip-lng">Longitudine</label>
+                            <input type="number" id="trip-lng" step="0.0001" placeholder="Es: 13.4050">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trip-description">Descrizione</label>
+                        <textarea id="trip-description" rows="4" placeholder="Descrivi il viaggio..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trip-notes">Note</label>
+                        <textarea id="trip-notes" rows="3" placeholder="Note aggiuntive..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="trip-completed">
+                            Viaggio già completato
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Crea Viaggio</button>
+                        <button type="reset" class="btn btn-outline">Resetta Form</button>
+                    </div>
+
+                    <div id="new-trip-message" class="message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- MODAL: GESTIONE PARTECIPANTI -->
+    <!-- ================================ -->
+    <div id="participants-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Gestisci Partecipanti</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="participants-checkboxes">
+                    <!-- Lista checkbox utenti sarà generata qui -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-participants-btn" class="btn btn-primary">Salva</button>
+                <button class="btn btn-outline modal-close">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- MODAL: AGGIUNGI/MODIFICA ATTIVITÀ -->
+    <!-- ================================ -->
+    <div id="activity-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="activity-modal-title">Aggiungi Attività</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="activity-form">
+                    <input type="hidden" id="activity-id">
+                    
+                    <div class="form-group">
+                        <label for="activity-title">Titolo *</label>
+                        <input type="text" id="activity-title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activity-description">Descrizione</label>
+                        <textarea id="activity-description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activity-date">Data e Ora</label>
+                        <input type="datetime-local" id="activity-date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activity-location">Luogo</label>
+                        <input type="text" id="activity-location">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activity-notes">Note</label>
+                        <textarea id="activity-notes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="save-activity-btn" class="btn btn-primary">Salva</button>
+                <button class="btn btn-outline modal-close">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- MODAL: AGGIUNGI SPESA -->
+    <!-- ================================ -->
+    <div id="expense-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Aggiungi Spesa</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label for="expense-description">Descrizione *</label>
+                        <input type="text" id="expense-description" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expense-amount">Importo (€) *</label>
+                            <input type="number" id="expense-amount" step="0.01" required min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expense-category">Categoria</label>
+                            <select id="expense-category">
+                                <option value="Trasporto">Trasporto</option>
+                                <option value="Alloggio">Alloggio</option>
+                                <option value="Cibo">Cibo</option>
+                                <option value="Attività">Attività</option>
+                                <option value="Altro">Altro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expense-paid-by">Pagato da</label>
+                            <select id="expense-paid-by">
+                                <option value="">Seleziona...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expense-date">Data</label>
+                            <input type="date" id="expense-date">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="save-expense-btn" class="btn btn-primary">Salva</button>
+                <button class="btn btn-outline modal-close">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="main.js"></script>
+</body>
+</html>
